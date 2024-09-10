@@ -1,0 +1,14 @@
+[tool.poetry]
+name = "osm-tool"
+version = "0.1.0"
+description = ""
+authors = ["Matheus Roque <matheusdcroque@gmail.com>"]
+readme = "README.md"
+
+[tool.poetry.dependencies]
+python = ">=3.12, <3.13"
+osmnx = "^1.9.4"
+
+[build-system]
+requires = ["poetry-core"]
+build-backend = "poetry.core.masonry.api"
