@@ -23,5 +23,6 @@ Cargo.lock
 #Python/Poetry
 
 python-scripts/cache
+python-scripts/osm_tool/__pycache__
 python-scripts/dist
 python-scripts/poetry.lock

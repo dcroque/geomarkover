@@ -40,7 +40,7 @@ def create_path(path: str) -> bool:
     try:
         pathlib.Path(path).mkdir(parents=True, exist_ok=True)
         return True
-    except e:
+    except Exception as e:
         print(f"Failed to create path {path} with exception: {e}")
         return False
 
@@ -49,22 +49,27 @@ def save_graph(
         graph_name: str, 
         base_path: str = "output", 
         prune_keys: list[str] = [],
+        inverted_prune: bool = False,
         needed_keys: list[str] = default_needed_keys) -> bool:
     path = base_path + "/" + graph_name + "/"
 
+    if not create_path(path):
+        print(f"Error saving graph at {path}: Failed to create directory")
+        return False
+
     if not check_graph_integrity(graph, needed_keys):
-        print(f"Error saving edges at {path}")
+        print(f"Error saving graph at {path}: Graph integrity issues")
         return False
 
     if len(prune_keys) >= 1:
-        graph = prune_graph_info(graph, prune_keys)
-
-    if not save_edges_info(graph, path):
-        print(f"Error saving edges at {path}")
-        return False
+        graph = prune_graph_info(graph, prune_keys, inverted_prune)
 
     if not save_nodes_info(graph, path):
-        print(f"Error saving nodes at {path}")
+        print(f"Error saving graph at {path}: Failed to save node data")
+        return False
+
+    if not save_edges_info(graph, path):
+        print(f"Error saving graph at {path}: Failed to save edge data")
         return False
 
     return True
@@ -82,7 +87,6 @@ def check_graph_integrity(graph: nx.MultiDiGraph, needed_keys: list[str]) -> boo
             case _:
                 raise Exception()
 
-    print("check_graph_integrity")
     for node in graph.nodes(data=True):
         if (node[1]["x"] is None or 
             node[1]["y"] is None or 
@@ -107,21 +111,43 @@ def check_graph_integrity(graph: nx.MultiDiGraph, needed_keys: list[str]) -> boo
                     return False
     return True
 
-def prune_graph_info(graph: nx.MultiDiGraph, prune_keys: list[str]) -> nx.MultiDiGraph:
-    print("prune_graph_info")
-    for key in prune_keys:
+def prune_graph_info(graph: nx.MultiDiGraph, prune_keys: list[str], is_inverted: bool = False) -> nx.MultiDiGraph:
+    if is_inverted:
         for edge in graph.edges(data=True):
-            if key in edge[2]:
+            remove_list = []
+            for key, _ in edge[2].items():
+                if key not in prune_keys:
+                    remove_list.append(key)
+            for key in remove_list:
                 edge[2].pop(key)
+    else:
+        for edge in graph.edges(data=True):
+            for key in prune_keys:
+                if key in edge[2]:
+                    edge[2].pop(key)
     return graph
 
 def save_nodes_info(graph: nx.MultiDiGraph, path: str) -> bool:
-    print("save_nodes_info")
-    return False
+    try:
+        data = list(graph.nodes(data=True))
+        fullpath = path + "/nodes.json"
+        with open(fullpath, 'w') as f:
+            json.dump(data, f, indent=4)
+        return True
+    except Exception as e:
+        print(f"Exception: {e}")
+        return False
 
 def save_edges_info(graph: nx.MultiDiGraph, path: str) -> bool:
-    print("save_edges_info")
-    return False
+    try:
+        data = list(graph.edges(data=True))
+        fullpath = path + "/edges.json"
+        with open(fullpath, 'w') as f:
+            json.dump(data, f, indent=4)
+        return True
+    except Exception as e:
+        print(f"Exception: {e}")
+        return False
 
 def main():
     process_args()
@@ -131,7 +157,7 @@ def main():
     for edge in list(nw.edges(data=True)):
         if not "maxspeed" in edge[2] and not "speed_kph" in edge[2]:
             print(edge)
-    save_graph(graph=nw, graph_name="grafinho", base_path="../../teste", prune_keys=["geometry"])
+    save_graph(graph=nw, graph_name="grafinho2", base_path="../teste", prune_keys=["geometry"], inverted_prune=False)
 
 if __name__ == "__main__":
     main()
