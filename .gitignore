@@ -27,3 +27,7 @@ output
 python-scripts/osm_tool/__pycache__
 python-scripts/dist
 python-scripts/poetry.lock
+
+# Added by cargo
+
+/target
