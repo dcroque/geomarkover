@@ -21,12 +21,12 @@ Cargo.lock
 #.idea/
 
 #Python/Poetry
-
 python-scripts/cache
-output
 python-scripts/osm_tool/__pycache__
 python-scripts/dist
 python-scripts/poetry.lock
+cache
+output
 
 # Added by cargo
 

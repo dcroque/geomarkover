@@ -42,7 +42,7 @@ def process_args() -> dict:
         request_info["retrieval_type"] = "noop"
         return request_info
     
-    request_info["path"] = cli.args.file_path if cli.args.file_path is not None else "../output"
+    request_info["path"] = cli.args.file_path if cli.args.file_path is not None else "output"
     request_info["name"] = cli.args.name if cli.args.name is not None else "default"
     request_info["save_results"] = not cli.args.dry_run
 
@@ -185,8 +185,15 @@ def prune_graph_info(graph: nx.MultiDiGraph, prune_keys: list[str], is_inverted:
     return graph
 
 def save_nodes_info(graph: nx.MultiDiGraph, path: str) -> bool:
+    data = list(graph.nodes(data=True))
+    for i in range(len(data)):
+        entry = {
+            "id": data[i][0],
+            "latitude": data[i][1]["x"],
+            "longitude": data[i][1]["y"],
+        }
+        data[i] = entry
     try:
-        data = list(graph.nodes(data=True))
         fullpath = path + "/nodes.json"
         with open(fullpath, 'w') as f:
             json.dump(data, f, indent=4, ensure_ascii=False)
@@ -196,8 +203,20 @@ def save_nodes_info(graph: nx.MultiDiGraph, path: str) -> bool:
         return False
 
 def save_edges_info(graph: nx.MultiDiGraph, path: str) -> bool:
+    data = list(graph.edges(data=True))
+    for i in range(len(data)):
+        entry = {
+            "id": int(data[i][2]["osmid"]),
+            "start": data[i][0],
+            "end": data[i][1],
+            "lanes": float(data[i][2]["lanes"]),
+            "maxspeed": int(data[i][2]["maxspeed"]),
+            "length": data[i][2]["length"],
+            "oneway": data[i][2]["oneway"],
+            "highway": data[i][2]["highway"],
+        }
+        data[i] = entry
     try:
-        data = list(graph.edges(data=True))
         fullpath = path + "/edges.json"
         with open(fullpath, 'w') as f:
             json.dump(data, f, indent=4, ensure_ascii=False)
