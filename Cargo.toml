@@ -8,3 +8,5 @@ edition = "2021"
 [dependencies]
 serde_json = "1.0.128"
 serde = {version = "1.0.210", features = ["derive"]}
+chrono = "0.4.38"
+rsparse = "1.0.0"
