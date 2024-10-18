@@ -9,4 +9,4 @@ edition = "2021"
 serde_json = "1.0.128"
 serde = {version = "1.0.210", features = ["derive"]}
 chrono = "0.4.38"
-rsparse = "1.0.0"
+structopt = { version = "0.3.26", default-features = false }

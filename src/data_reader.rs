@@ -39,30 +39,6 @@ pub struct Street {
     pub highway: String,
 }
 
-impl Street {
-    fn new(
-        id: u64,
-        start: u64,
-        end: u64,
-        lanes: f32,
-        maxspeed: u8,
-        length: f64,
-        oneway: bool,
-        highway: String,
-    ) -> Self {
-        Street {
-            id,
-            start,
-            end,
-            lanes,
-            maxspeed,
-            length,
-            oneway,
-            highway,
-        }
-    }
-}
-
 #[derive(Debug)]
 pub struct NetworkData {
     pub name: String,
@@ -95,13 +71,13 @@ impl NetworkData {
 }
 
 mod tests {
-    use super::*;
-    use crate::osm::get_data_from_place;
 
     #[test]
     fn read_output_from_osm() {
-        get_data_from_place("jose_mendes", "José Mendes, Florianópolis");
-        let _ =
-            NetworkData::new_from_file("jose_mendes".to_string(), "output/jose_mendes".to_string());
+        crate::osm::get_data_from_place("jose_mendes", "José Mendes, Florianópolis");
+        let _ = super::NetworkData::new_from_file(
+            "jose_mendes".to_string(),
+            "output/jose_mendes".to_string(),
+        );
     }
 }
