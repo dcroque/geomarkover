@@ -1,6 +1,6 @@
 use std::process::exit;
 
-use geomarkover::{data_reader, google_routes, markov_chain, osm};
+use geomarkover::{data_reader, markov_chain, osm};
 
 use structopt::StructOpt;
 
@@ -13,7 +13,7 @@ struct ArgsTransitionMatrix {
     #[structopt(short = "f", long = "filepath")]
     nw_graph_path: Option<String>,
     #[structopt(short = "d", long = "datasource", default_value = "osm")]
-    data_source: markov_chain::TrafficDataSource,
+    data_source: String,
     #[structopt(short = "o", long = "output")]
     show_output: bool,
     #[structopt(short = "s", long = "save")]
@@ -26,20 +26,25 @@ enum Cli {
     CalcTransitionMatrix(ArgsTransitionMatrix),
 }
 
-fn main() {
+#[tokio::main]
+async fn main() {
     let cli = Cli::from_args();
 
     match cli {
         Cli::CalcTransitionMatrix(args) => {
+            let data_source = markov_chain::TrafficDataSource::from_str(&args.data_source).await;
+
+            let filepath: String;
             let nw = match args.nw_graph_path {
-                Some(path) => data_reader::NetworkData::new_from_file(args.name, path),
+                Some(path) => {
+                    filepath = path.clone();
+                    data_reader::NetworkData::new_from_file(args.name, path)
+                }
                 None => match args.place_name {
                     Some(place) => {
+                        filepath = format!("output/{}", args.name);
                         osm::get_data_from_place(&args.name, &place);
-                        data_reader::NetworkData::new_from_file(
-                            args.name.clone(),
-                            format!("output/{}", args.name),
-                        )
+                        data_reader::NetworkData::new_from_file(args.name.clone(), filepath.clone())
                     }
                     None => {
                         println!("noop");
@@ -48,16 +53,38 @@ fn main() {
                 },
             };
 
-            let mkv_chain = markov_chain::MarkovChain::new_from_network(args.data_source, nw);
+            let mut mkv_chain = markov_chain::MarkovChain::new_from_network(data_source, nw).await;
+            let t_mtx = markov_chain::TransitionMatrix::new_from_markov_chain(&mkv_chain);
+            mkv_chain.calculate_density_from_matrix(&t_mtx, 100);
 
-            match args.show_output {
-                true => println!("PRINT"),
-                false => (),
+            if args.show_output {
+                println!("PRINT");
             }
 
-            match args.save_results {
-                true => println!("SAVE"),
-                false => (),
+            if args.save_results {
+                if mkv_chain.save_data(filepath.clone(), args.data_source.clone()) {
+                    println!(
+                        "Saved markov chain data to {}/markov_chain.json",
+                        filepath.clone()
+                    );
+                } else {
+                    println!(
+                        "Failed to save markov chain data to {}/markov_chain.json",
+                        filepath.clone()
+                    );
+                }
+
+                if t_mtx.save_to_file(filepath.clone(), args.data_source.clone()) {
+                    println!(
+                        "Saved markov chain data to {}/transition_matrix.csv",
+                        filepath.clone()
+                    );
+                } else {
+                    println!(
+                        "Failed to save markov chain data to {}/transition_matrix.csv",
+                        filepath.clone()
+                    );
+                }
             }
         }
     }

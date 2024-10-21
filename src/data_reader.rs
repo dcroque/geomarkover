@@ -8,31 +8,21 @@ use std::fs::File;
 use std::io::BufReader;
 use std::path::Path;
 
-use serde::Deserialize;
+use serde::{Deserialize, Serialize};
 
-#[derive(Debug, Deserialize, Clone)]
+#[derive(Debug, Serialize, Deserialize, Clone)]
 pub struct Intersection {
     pub id: u64,
     pub latitude: f64,
     pub longitude: f64,
 }
 
-impl Intersection {
-    fn new(id: u64, latitude: f64, longitude: f64) -> Self {
-        Intersection {
-            id,
-            latitude,
-            longitude,
-        }
-    }
-}
-
-#[derive(Debug, Deserialize, Clone)]
+#[derive(Debug, Serialize, Deserialize, Clone)]
 pub struct Street {
     pub id: u64,
     pub start: u64,
     pub end: u64,
-    pub lanes: f32,
+    pub lanes: f64,
     pub maxspeed: u8,
     pub length: f64,
     pub oneway: bool,
