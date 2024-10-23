@@ -189,8 +189,8 @@ def save_nodes_info(graph: nx.MultiDiGraph, path: str) -> bool:
     for i in range(len(data)):
         entry = {
             "id": data[i][0],
-            "latitude": data[i][1]["x"],
-            "longitude": data[i][1]["y"],
+            "latitude": data[i][1]["y"],
+            "longitude": data[i][1]["x"],
         }
         data[i] = entry
     try:
@@ -230,9 +230,9 @@ def save_edges_info(graph: nx.MultiDiGraph, path: str) -> bool:
 def main():
     request = process_args()
     if process_request(request_info=request):
-        print("Success")
+        pass
     else:
-        print("Failed")
+        print("Failed to process request")
 
 if __name__ == "__main__":
     main()

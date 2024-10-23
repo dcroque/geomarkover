@@ -9,4 +9,9 @@ edition = "2021"
 serde_json = "1.0.128"
 serde = {version = "1.0.210", features = ["derive"]}
 chrono = "0.4.38"
-rsparse = "1.0.0"
+structopt = { version = "0.3.26", default-features = false }
+google_maps = "3.7"
+actix-web = "4.9.0"
+actix-rt = "2.10.0"
+futures = "0.3.31"
+tokio = { version = "1.41.0", features = ["full"] }

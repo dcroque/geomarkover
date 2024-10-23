@@ -8,59 +8,25 @@ use std::fs::File;
 use std::io::BufReader;
 use std::path::Path;
 
-use serde::Deserialize;
+use serde::{Deserialize, Serialize};
 
-#[derive(Debug, Deserialize, Clone)]
+#[derive(Debug, Serialize, Deserialize, Clone)]
 pub struct Intersection {
     pub id: u64,
     pub latitude: f64,
     pub longitude: f64,
 }
 
-impl Intersection {
-    fn new(id: u64, latitude: f64, longitude: f64) -> Self {
-        Intersection {
-            id,
-            latitude,
-            longitude,
-        }
-    }
-}
-
-#[derive(Debug, Deserialize, Clone)]
+#[derive(Debug, Serialize, Deserialize, Clone)]
 pub struct Street {
     pub id: u64,
     pub start: u64,
     pub end: u64,
-    pub lanes: f32,
+    pub lanes: f64,
     pub maxspeed: u8,
     pub length: f64,
     pub oneway: bool,
     pub highway: String,
-}
-
-impl Street {
-    fn new(
-        id: u64,
-        start: u64,
-        end: u64,
-        lanes: f32,
-        maxspeed: u8,
-        length: f64,
-        oneway: bool,
-        highway: String,
-    ) -> Self {
-        Street {
-            id,
-            start,
-            end,
-            lanes,
-            maxspeed,
-            length,
-            oneway,
-            highway,
-        }
-    }
 }
 
 #[derive(Debug)]
@@ -95,13 +61,13 @@ impl NetworkData {
 }
 
 mod tests {
-    use super::*;
-    use crate::osm::get_data_from_place;
 
     #[test]
     fn read_output_from_osm() {
-        get_data_from_place("jose_mendes", "José Mendes, Florianópolis");
-        let _ =
-            NetworkData::new_from_file("jose_mendes".to_string(), "output/jose_mendes".to_string());
+        crate::osm::get_data_from_place("jose_mendes", "José Mendes, Florianópolis");
+        let _ = super::NetworkData::new_from_file(
+            "jose_mendes".to_string(),
+            "output/jose_mendes".to_string(),
+        );
     }
 }
