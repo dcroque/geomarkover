@@ -9,6 +9,16 @@ parser.add_argument('-d',
                     action='store_true',
                     help='Save results to file')
 
+parser.add_argument('-i',
+                    '--image_generation',
+                    action='store_true',
+                    help='Create image from data')
+
+parser.add_argument('-s',
+                    '--source',
+                    type=str,
+                    help='Source of data for image genaration')
+
 parser.add_argument('-p',
                     '--place',
                     type=str,
