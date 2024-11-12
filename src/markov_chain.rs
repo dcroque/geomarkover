@@ -6,6 +6,7 @@ use crate::data_reader::*;
 use crate::google_routes::*;
 
 use futures::future;
+use futures::stream::Collect;
 use serde::Serialize;
 use serde_json;
 
@@ -289,7 +290,17 @@ impl MarkovChain {
             })
             .collect::<Vec<f64>>()
             .into_iter()
-            .min_by(|a, b| a.partial_cmp(b).unwrap())
+            .min_by(|a, b| match a.partial_cmp(b) {
+                Some(x) => x,
+                None => {
+                    println!("a = {a}, b = {b}");
+                    if a.is_nan() {
+                         b.partial_cmp(b).unwrap()
+                    } else {
+                         a.partial_cmp(a).unwrap()
+                    }
+                }
+            })
             .unwrap();
 
         graph = graph
@@ -391,7 +402,22 @@ impl MarkovChain {
             .unwrap()
     }
 
-    pub fn calculate_density_from_matrix(&mut self, t_mtx: &TransitionMatrix, vehicle_count: u64) {
+    // Supondo densidade livre em todos os trechos inicialmente -> 7 vei/km/faixa
+    pub fn estimate_vehicle_count(&self) -> u64 {
+        self.graph
+            .iter()
+            .map(|x| {
+                7.0*x.street_data.lanes*x.street_data.length/1000.0
+            })
+            .sum::<f64>() as u64
+    }
+
+    pub fn calculate_density_from_matrix(&mut self, t_mtx: &TransitionMatrix, vehicle_count: Option<u64>) {
+        let vehicle_count = match vehicle_count {
+            None => self.estimate_vehicle_count(),
+            Some(v) => v,
+        };
+
         let h_graph = self.graph.clone();
 
         self.graph = self

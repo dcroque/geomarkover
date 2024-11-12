@@ -55,7 +55,7 @@ async fn main() {
 
             let mut mkv_chain = markov_chain::MarkovChain::new_from_network(data_source, nw).await;
             let t_mtx = markov_chain::TransitionMatrix::new_from_markov_chain(&mkv_chain);
-            mkv_chain.calculate_density_from_matrix(&t_mtx, 100);
+            mkv_chain.calculate_density_from_matrix(&t_mtx, None);
 
             if args.show_output {
                 println!("PRINT");
